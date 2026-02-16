@@ -1,37 +1,28 @@
 {
   "name": "KCL",
   "scopeName": "source.kcl",
-  "fileTypes": [
-    "kcl"
-  ],
+  "fileTypes": ["kcl"],
   "uuid": "1ec087d3-5945-49c4-94a0-ce9c757dc153",
   "patterns": [
     {
-      "name": "comment.block.kcl",
-      "begin": "/\\*",
-      "end": "\\*/",
-      "beginCaptures": {
-        "0": {
-          "name": "punctuation.definition.comment.begin.kcl"
-        }
-      },
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.comment.end.kcl"
-        }
-      }
+      "name": "comment.line.shebang.kcl",
+      "match": "^#![^\n]*"
+    },
+    {
+      "name": "comment.line.documentation.module.kcl",
+      "match": "//![^\n]*"
+    },
+    {
+      "name": "comment.line.documentation.kcl",
+      "match": "///[^\n]*"
     },
     {
       "name": "comment.line.double-slash.kcl",
-      "match": "//.*$"
+      "match": "//[^\n]*"
     },
     {
       "name": "keyword.control.conditional.kcl",
-      "match": "\\b(if|else if|else)\\b"
-    },
-    {
-      "name": "keyword.control.conditional.kcl",
-      "match": "\\b(if|else if|else)\\b"
+      "match": "\\b(if|else)\\b"
     },
     {
       "name": "keyword.control.return.kcl",
@@ -39,40 +30,29 @@
     },
     {
       "name": "keyword.control.function.kcl",
-      "match": "\\b(fn|function)\\b"
+      "match": "\\bfn\\b"
     },
     {
-      "name": "keyword.declaration.kcl",
-      "match": "\\b(var|let|const)\\b"
+      "name": "storage.modifier.export.kcl",
+      "match": "\\bexport\\b"
     },
     {
-      "name": "keyword.operator.comparison.kcl",
-      "match": "(==|!=|<=|>=|<|>)"
-    },
-    {
-      "name": "keyword.operator.definition.kcl",
-      "match": "="
-    },
-    {
-      "name": "meta.module.import.statement.kcl",
-      "begin": "\\b(import)\\s+(?=\\w+)",
+      "name": "meta.annotation.kcl",
+      "begin": "@\\(",
       "beginCaptures": {
-        "1": {
-          "name": "keyword.module.import.kcl"
+        "0": {
+          "name": "punctuation.definition.annotation.begin.kcl"
         }
       },
-      "end": "\\b(from)\\s+('[^']*'|\"[^\"]*\")",
+      "end": "\\)",
       "endCaptures": {
-        "1": {
-          "name": "keyword.module.import.from.kcl"
-        },
-        "2": {
-          "name": "string.quoted.module.kcl"
+        "0": {
+          "name": "punctuation.definition.annotation.end.kcl"
         }
       },
       "patterns": [
         {
-          "include": "#import-item"
+          "include": "#annotation-kv"
         },
         {
           "name": "punctuation.separator.comma.kcl",
@@ -81,20 +61,52 @@
       ]
     },
     {
-      "name": "keyword.module.import.kcl",
-      "match": "\\bimport\\b"
+      "name": "meta.import.kcl",
+      "begin": "\\b(import)\\s+",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.import.kcl"
+        }
+      },
+      "end": "(?=\\n|;)|(?<=\\))",
+      "patterns": [
+        {
+          "name": "string.quoted.double.kcl",
+          "begin": "\"",
+          "end": "\"",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.kcl"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.kcl"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#escape-sequence"
+            }
+          ]
+        },
+        {
+          "name": "keyword.control.import.as.kcl",
+          "match": "\\bas\\b"
+        },
+        {
+          "name": "entity.name.import.alias.kcl",
+          "match": "(?<=as\\s)\\w+"
+        }
+      ]
     },
     {
       "name": "entity.name.tag.kcl",
       "match": "\\$\\w+\\b"
     },
     {
-      "name": "keyword.directive.settings.kcl",
-      "match": "@\\w+\\b"
-    },
-    {
       "name": "meta.function.declaration.kcl",
-      "begin": "\\b(fn|function)\\s+(\\w+)\\s*(\\()",
+      "begin": "\\b(fn)\\s+(\\w+)\\s*(\\()",
       "beginCaptures": {
         "1": {
           "name": "keyword.control.function.kcl"
@@ -114,71 +126,32 @@
       },
       "patterns": [
         {
-          "name": "variable.parameter.kcl",
-          "match": "\\b\\w+\\b"
+          "include": "#parameter"
         },
         {
           "name": "punctuation.separator.parameter.kcl",
           "match": ","
         },
         {
-          "name": "keyword.operator.assignment.kcl",
-          "match": "="
+          "include": "#comment"
         }
       ]
     },
     {
-      "name": "meta.function.definition.kcl",
-      "begin": "\\b((export)\\s+)?(fn)\\s+(\\w+)\\s*(=)",
+      "name": "meta.return-type.kcl",
+      "begin": "(?<=\\))\\s*(\\?)?(:)",
       "beginCaptures": {
         "1": {
-          "name": "storage.modifier.visibility.kcl"
+          "name": "keyword.operator.optional-return.kcl"
         },
-        "3": {
-          "name": "keyword.control.function.kcl"
-        },
-        "4": {
-          "name": "entity.name.function.kcl"
-        },
-        "5": {
-          "name": "keyword.operator.definition.kcl"
+        "2": {
+          "name": "punctuation.separator.type.kcl"
         }
       },
-      "end": "\\{",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.section.block.begin.kcl"
-        }
-      },
+      "end": "(?=\\{)",
       "patterns": [
         {
-          "name": "meta.parameters.kcl",
-          "begin": "\\(",
-          "beginCaptures": {
-            "0": {
-              "name": "punctuation.section.parameters.begin.kcl"
-            }
-          },
-          "end": "\\)",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.section.parameters.end.kcl"
-            }
-          },
-          "patterns": [
-            {
-              "name": "variable.parameter.kcl",
-              "match": "\\b\\w+\\b"
-            },
-            {
-              "name": "punctuation.separator.parameter.function.kcl",
-              "match": ","
-            }
-          ]
-        },
-        {
-          "name": "keyword.operator.fat-arrow.kcl",
-          "match": "=>"
+          "include": "#type-name"
         }
       ]
     },
@@ -210,29 +183,7 @@
       },
       "patterns": [
         {
-          "name": "constant.character.escape.kcl",
-          "match": "\\\\."
-        }
-      ]
-    },
-    {
-      "name": "string.quoted.single.kcl",
-      "begin": "'",
-      "end": "'",
-      "beginCaptures": {
-        "0": {
-          "name": "punctuation.definition.string.begin.kcl"
-        }
-      },
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.string.end.kcl"
-        }
-      },
-      "patterns": [
-        {
-          "name": "constant.character.escape.kcl",
-          "match": "\\\\."
+          "include": "#escape-sequence"
         }
       ]
     },
@@ -246,15 +197,27 @@
     },
     {
       "match": "\\b(true|false)\\b",
-      "name": "constant.language.kcl"
+      "name": "constant.language.boolean.kcl"
     },
     {
       "name": "constant.numeric.kcl",
-      "match": "(\\b\\d+(\\.\\d+)?|\\.\\d+)\\b"
+      "match": "-?\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b|-?\\.\\d+([eE][+-]?\\d+)?\\b"
+    },
+    {
+      "name": "keyword.operator.comparison.kcl",
+      "match": "(==|!=|<=|>=|<|>)"
+    },
+    {
+      "name": "keyword.operator.logical.kcl",
+      "match": "(&|\\|)(?!>)"
     },
     {
       "name": "keyword.operator.arithmetic.kcl",
       "match": "[+\\-*/^]"
+    },
+    {
+      "name": "keyword.operator.assignment.kcl",
+      "match": "="
     },
     {
       "name": "support.constant.prelude.kcl",
@@ -271,6 +234,14 @@
     {
       "name": "punctuation.section.array.end.kcl",
       "match": "\\]"
+    },
+    {
+      "name": "punctuation.section.block.begin.kcl",
+      "match": "\\{"
+    },
+    {
+      "name": "punctuation.section.block.end.kcl",
+      "match": "\\}"
     },
     {
       "name": "punctuation.separator.colon.kcl",
@@ -295,18 +266,89 @@
     }
   ],
   "repository": {
-    "import-item": {
-      "name": "meta.module.import.item.kcl",
-      "match": "\\b(\\w+)(?:\\s+(as)\\s+(\\w+))?",
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.documentation.module.kcl",
+          "match": "//![^\n]*"
+        },
+        {
+          "name": "comment.line.documentation.kcl",
+          "match": "///[^\n]*"
+        },
+        {
+          "name": "comment.line.double-slash.kcl",
+          "match": "//[^\n]*"
+        }
+      ]
+    },
+    "escape-sequence": {
+      "name": "constant.character.escape.kcl",
+      "match": "\\\\(\"|\\\\|/|b|f|n|r|t|u[0-9a-fA-F]{4})"
+    },
+    "parameter": {
+      "patterns": [
+        {
+          "name": "meta.parameter.kcl",
+          "match": "(@)?(\\w+)(\\?)?(?:\\s*(:)\\s*(\\w+))?",
+          "captures": {
+            "1": {
+              "name": "storage.modifier.parameter-attribute.kcl"
+            },
+            "2": {
+              "name": "variable.parameter.kcl"
+            },
+            "3": {
+              "name": "keyword.operator.optional.kcl"
+            },
+            "4": {
+              "name": "punctuation.separator.type.kcl"
+            },
+            "5": {
+              "name": "support.type.kcl"
+            }
+          }
+        }
+      ]
+    },
+    "type-name": {
+      "patterns": [
+        {
+          "name": "meta.type.union.kcl",
+          "match": "(\\w+)(?:\\s*(\\()\\s*(\\w+)\\s*(\\)))?",
+          "captures": {
+            "1": {
+              "name": "support.type.kcl"
+            },
+            "2": {
+              "name": "punctuation.section.type-units.begin.kcl"
+            },
+            "3": {
+              "name": "support.type.unit.kcl"
+            },
+            "4": {
+              "name": "punctuation.section.type-units.end.kcl"
+            }
+          }
+        },
+        {
+          "name": "keyword.operator.type-union.kcl",
+          "match": "\\|(?!>)"
+        }
+      ]
+    },
+    "annotation-kv": {
+      "name": "meta.annotation.key-value.kcl",
+      "match": "(\\w+)\\s*(=)\\s*(\\w+)",
       "captures": {
         "1": {
-          "name": "variable.import.kcl"
+          "name": "entity.other.attribute-name.kcl"
         },
         "2": {
-          "name": "keyword.module.import.item.as.kcl"
+          "name": "keyword.operator.assignment.kcl"
         },
         "3": {
-          "name": "variable.import.alias.kcl"
+          "name": "string.unquoted.attribute-value.kcl"
         }
       }
     },
