@@ -1,15 +1,18 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { toJsLiteral } from './packages/langs-precompiled/scripts/langs.js'
-import { precompileGrammar } from './packages/langs-precompiled/scripts/precompile.js'
+import { fileURLToPath } from 'node:url'
+import { toJsLiteral } from '../packages/langs-precompiled/scripts/langs.js'
+import { precompileGrammar } from '../packages/langs-precompiled/scripts/precompile.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Get grammar file path from command line arguments
 const grammarFilePath = process.argv[2]
 
 if (!grammarFilePath) {
   console.error('❌ Please provide a TextMate grammar file path as an argument')
-  console.error('Usage: npx tsx precompile-grammar.ts <path-to-grammar.tmLanguage.json>')
+  console.error('Usage: npx tsx precompiled/precompile-grammar.ts <path-to-grammar.tmLanguage.json>')
   process.exit(1)
 }
 
@@ -82,8 +85,8 @@ try {
   const precompiled = precompileGrammar(languageRegistration)
   const precompiledStr = toJsLiteral(precompiled)
 
-  // Generate output filename based on language name
-  const outputFileName = `${languageInfo.name}-precompiled.mjs`
+  // Generate output file path in the precompiled/ directory alongside this script
+  const outputFileName = path.join(__dirname, `${languageInfo.name}-precompiled.mjs`)
 
   // Generate the output .mjs file
   const output = `${precompiledStr.includes('new EmulatedRegExp') ? 'import { EmulatedRegExp } from \'oniguruma-to-es\'\n' : ''}
@@ -117,7 +120,7 @@ export default langs;
   console.log(`
 import { createHighlighterCore } from 'shiki'
 import { createJavaScriptRawEngine } from '@shikijs/engine-javascript'
-import ${languageInfo.name}Lang from './${outputFileName}'
+import ${languageInfo.name}Lang from './precompiled/${languageInfo.name}-precompiled.mjs'
 
 const highlighter = await createHighlighterCore({
   themes: [/* your themes */],
@@ -135,7 +138,7 @@ catch (error) {
   console.error(`❌ Failed to precompile ${languageInfo.displayName} grammar:`, error)
 
   // Fallback: create a simpler version without precompilation
-  const simpleOutputFileName = `${languageInfo.name}-simple.mjs`
+  const simpleOutputFileName = path.join(__dirname, `${languageInfo.name}-simple.mjs`)
   const simpleOutput = `const lang = Object.freeze(${JSON.stringify(languageRegistration, null, 2)})
 
 export default [lang]

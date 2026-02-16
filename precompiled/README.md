@@ -5,13 +5,13 @@ This script allows you to precompile any TextMate grammar file for use with Shik
 ## Usage
 
 ```bash
-npx tsx precompile-grammar.ts <path-to-grammar-file>
+npx tsx precompiled/precompile-grammar.ts <path-to-grammar-file>
 ```
 
 ### Example
 
 ```bash
-npx tsx precompile-grammar.ts /path/to/your-language.tmLanguage.json
+npx tsx precompiled/precompile-grammar.ts /path/to/your-language.tmLanguage.json
 ```
 
 ## What it does
